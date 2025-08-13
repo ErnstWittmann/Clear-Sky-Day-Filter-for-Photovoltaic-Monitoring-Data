@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-def get_clearskydays(data, column_time="time", column_power="power", column_id="module_id",
-                     comparison_intervall="30d", prep_smooth_kernal=10, smooth_kernal=60, percentil=0.9,
-                     first_last_limit=0.1, show_first_last_value=False,
-                     min_number_of_datapoints=None, find_numberofpoints=True,
-                     hole_size_threshold=100, show_max_hole_size = False,
-                     plot_raw_data=False,
-                     corr_threshold=0.98, plot_corr_results=False,
-                     max_dist=40, n_max_exceeds=50, plot_taken_results=False):
+def get_clearskydays(data, column_time: str="time", column_power: str="power", column_id: str="module_id",
+                     comparison_intervall: str="30d", prep_smooth_kernal: int=10, smooth_kernal: int=60, percentil: float=0.9,
+                     first_last_limit: float=0.1, show_first_last_value: bool=False,
+                     min_number_of_datapoints: int=None, find_numberofpoints: bool=True,
+                     hole_size_threshold: int=100, show_max_hole_size: bool=False,
+                     plot_raw_data: bool=False,
+                     corr_threshold: float=0.98, plot_corr_results: bool=False,
+                     max_dist: int=40, n_max_exceeds: int=50, plot_taken_results: bool=False):
     """
     writen by Ernst Wittmann August, 6th, 2025
     publication: E. Wittmann, C. Buerhop-Lutz, S. Bennett, V. Christlein, J. Hauch, C. J. Brabec, I. M. Peters,
@@ -266,7 +266,7 @@ def get_clearskydays(data, column_time="time", column_power="power", column_id="
                                         print("-------------------------------------------------------------")
     return clear_sky_frame
 
-def get_clearskytemplate(id_data, column_time="time", column_power="power", percentil=0.9, prep_smooth_kernal=10, smooth_kernal=60):
+def get_clearskytemplate(id_data, column_time: str="time", column_power: str="power", percentil: float=0.9, prep_smooth_kernal: int=10, smooth_kernal: int=60):
     """
     Takes a dataframe of monitoring data, including power over time, over several days and creates a maximum value curve. (Clear sky template)
     Afterwards the daily curve is multiplied by a percentil, to correct the daily curve. The reason for correction is due to e.g. air polution.
@@ -292,11 +292,12 @@ def get_clearskytemplate(id_data, column_time="time", column_power="power", perc
         cst = cst.with_columns(pl.col(column_power).rolling_mean(window_size=prep_smooth_kernal, center=True))
     cst = cst.group_by("day_time").agg(pl.col(column_power).max())
     cst = cst.with_columns(pl.col(column_power)*percentil)
+    cst = cst.with_columns(pl.col(column_power).alias(f"tmp_{column_power}"))
     if smooth_kernal!=None:
         cst = cst.with_columns(pl.col(column_power).rolling_mean(window_size=smooth_kernal, center=True).alias(f"tmp_{column_power}"))
     return cst
 
-def add_daytime(day_data,column_time="time"):
+def add_daytime(day_data,column_time: str="time"):
     """
     Takes a data frame including time and adds a new column called "day_time" including the day time in minuts.
     :param day_data: polars dataframe including a time column
@@ -310,7 +311,7 @@ def add_daytime(day_data,column_time="time"):
     else:
         return day_data
 
-def _bad_holes_check(id_data, hole_size_threshold=20, column_time="day_time"):
+def _bad_holes_check(id_data, hole_size_threshold: int=20, column_time: str="time"):
     """
     Takes a data set including time. Checks, if the time between two timesteps is less than a given hole_size_threshold in minutes.
     :param day_data: polars frame with time
@@ -331,14 +332,14 @@ def _bad_holes_check(id_data, hole_size_threshold=20, column_time="day_time"):
         check = False
     return check, max_hole
 
-def _check_distance(comp_data, max_dist=10, n_max_exceeds=50, column_power="power"):
+def _check_distance(comp_data, max_dist: int=10, n_max_exceeds: int=50, column_power: str="power"):
     """Calculates the Euclidian Distances for each timestep between recoded power and clear sky template."""
     difs = np.abs(comp_data[column_power].to_numpy() - comp_data["tmp_"+column_power].to_numpy())
     difs = difs[difs>max_dist]
     if len(difs)>n_max_exceeds: return False
     else: return True
 
-def get_frequence(id_data, column_time):
+def get_frequence(id_data, column_time: str="time"):
     """
     Takes a polars dataframe, and calculates the median time in minutes between two timesteps.
     :param id_data: data frame as polars including time
