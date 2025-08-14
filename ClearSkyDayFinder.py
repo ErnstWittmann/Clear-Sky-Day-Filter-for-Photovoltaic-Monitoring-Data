@@ -16,6 +16,8 @@ def get_clearskydays(data, column_time: str="time", column_power: str="power", c
     publication: E. Wittmann, C. Buerhop-Lutz, S. Bennett, V. Christlein, J. Hauch, C. J. Brabec, I. M. Peters,
                 „PV Polaris – Automated PV system Orientation Prediction”, IEEE Photonics Journal, vol. 17,
                 no. 3, 2025. DOI: 10.1109/JPHOT.2025.3568887
+    If you used the code for your own publication, thats fine,
+    but I would be greatful, if you would cite the publication above if you do so :D
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     Code Explanation:
 
@@ -104,7 +106,7 @@ def get_clearskydays(data, column_time: str="time", column_power: str="power", c
     clear_sky_frame = pl.DataFrame()
     if column_id == None:
         column_id = "default_id"
-        data = data.with_column((pl.col("power")*0).alias("default_id"))
+        data = data.with_columns((pl.col("power")*0).alias("default_id"))
     for module_data in tqdm(data.partition_by(column_id)):
         #-----------------------------------------------------------
         # SET DEFAULTS
@@ -198,7 +200,7 @@ def get_clearskydays(data, column_time: str="time", column_power: str="power", c
             cst = get_clearskytemplate(month_data, prep_smooth_kernal=prep_smooth_kernal, smooth_kernal=smooth_kernal,
                                        percentil=percentil, column_time=column_time, column_power=column_power)
 
-
+            month_data = month_data.with_columns(pl.col(column_time).dt.date().alias("date"))
             for day_interval in month_data.group_by("date").agg([pl.col(column_time).alias("m_time"),
                                                                  pl.col(column_power).alias("m_power"),
                                                                  pl.col(column_id).alias("m_id")]).iter_rows():
