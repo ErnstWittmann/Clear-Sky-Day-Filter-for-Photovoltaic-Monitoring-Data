@@ -35,6 +35,16 @@ def get_clearskydays(data, column_time: str="time", column_power: str="power", c
     import matplotlib.pyplot as plt || version 3.10.5  -- used for helping plots
     from tqdm import tqdm || version 4.67.1 -- used for loading bars
 
+    if you need to download them with pip:
+    !pip install polars==1.32.0
+    !pip install matplotlib==3.10.5
+    !pip install tqdm==4.67.1
+
+    if you need to download them with conda:
+    conda install conda-forge::polars=1.32.0
+    conda install conda-forge::matplotlib=3.10.5
+    conda install conda-forge::tqdm=4.67.1
+
     ################################################################################################################################
     Data Values:
     :param data: polar frame, including time and power
